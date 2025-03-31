@@ -1,6 +1,9 @@
+"use client"
+
 import { ICliente } from "@lib/models/Cliente";
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form } from "rsuite";
+import * as S from "./styles";
 import "rsuite/dist/rsuite.min.css";
 
 const { Column, HeaderCell, Cell } = Table;
@@ -131,7 +134,7 @@ export default function Home() {
   });
 
   return (
-    <div style={{ padding: 20 }}>
+    <S.Container>
       <div style={{ display: "flex", marginBottom: 20, gap: 10 }}>
         <Input
           placeholder="Pesquisar por nome"
@@ -146,32 +149,32 @@ export default function Home() {
         </Button>
       </div>
 
-      <Table data={clientes} autoHeight bordered>
-        <Column width={100} align="center" fixed>
+      <Table data={clientes} autoHeight bordered hover>
+        <Column flexGrow={1} width={100} align="center" fixed>
           <HeaderCell>ID</HeaderCell>
           <Cell dataKey="_id" />
         </Column>
-        <Column width={150}>
+        <Column flexGrow={1} width={150} align="center">
           <HeaderCell>Nome</HeaderCell>
           <Cell dataKey="nome" />
         </Column>
-        <Column width={100}>
+        <Column flexGrow={1} width={100} align="center">
           <HeaderCell>Idade</HeaderCell>
           <Cell dataKey="idade" />
         </Column>
-        <Column width={100}>
+        <Column flexGrow={1} width={100} align="center">
           <HeaderCell>Sexo</HeaderCell>
           <Cell dataKey="sexo" />
         </Column>
-        <Column width={200}>
+        <Column flexGrow={1} width={250} align="center">
           <HeaderCell>Email</HeaderCell>
           <Cell dataKey="email" />
         </Column>
-        <Column width={150}>
+        <Column flexGrow={1} width={100} align="center">
           <HeaderCell>Telefone</HeaderCell>
           <Cell dataKey="telefone" />
         </Column>
-        <Column width={150} fixed="right">
+        <Column flexGrow={1} width={100} align="center" fixed="right">
           <HeaderCell>Ações</HeaderCell>
           <Cell>
             {(rowData: ICliente) => (
@@ -199,7 +202,6 @@ export default function Home() {
         </Column>
       </Table>
 
-      {/* Modal de Criação */}
       <Modal open={openModalCreate} onClose={() => setOpenModalCreate(false)}>
         <Modal.Header>
           <Modal.Title>Novo Cliente</Modal.Title>
@@ -260,7 +262,6 @@ export default function Home() {
         </Modal.Footer>
       </Modal>
 
-      {/* Modal de Edição */}
       <Modal open={openModalEdit} onClose={() => setOpenModalEdit(false)}>
         <Modal.Header>
           <Modal.Title>Editar Cliente</Modal.Title>
@@ -320,6 +321,6 @@ export default function Home() {
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>
+    </S.Container>
   );
 }
