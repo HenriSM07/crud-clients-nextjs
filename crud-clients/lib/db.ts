@@ -1,11 +1,14 @@
-import { Pool } from 'pg';
+import mongoose from "mongoose";
+import { ClienteModel } from "./models/Cliente";
 
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'db',
-  database: process.env.DB_NAME || 'crud_clients_db',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: parseInt(process.env.DB_PORT || '5432'),
-});
+const uri = process.env.MONGO_URI || "";
 
-export default pool;
+async function connect() {
+  if (!mongoose.connection.readyState) {
+    await mongoose.connect(uri);
+    console.log("Conectado ao MongoDB");
+  }
+  return { ClienteModel };
+}
+
+export default connect;

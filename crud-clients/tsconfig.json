@@ -16,9 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@lib/*": ["lib/*"],
-      "@src/*": ["src/*"],
-      "@pages/*": ["src/pages/*"]
-    }
+      "@src/*": ["src/*"]
+    },
+    "types": ["node"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
