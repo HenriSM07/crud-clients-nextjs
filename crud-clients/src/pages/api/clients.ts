@@ -7,8 +7,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     if (req.method === "GET") {
       const { search } = req.query;
+      const deviceType = req.query.device || req.headers["device-type"] || "desktop";
+
+      let fieldsToInclude = ["_id", "nome", "idade", "sexo", "email", "telefone"];
+      if (deviceType === "tablet") {
+        fieldsToInclude = fieldsToInclude.filter((field) => field !== "telefone");
+      } else if (deviceType === "mobile") {
+        fieldsToInclude = fieldsToInclude.filter(
+          (field) => !["telefone", "email"].includes(field)
+        );
+      }
+
+      const projection = fieldsToInclude.reduce((acc: any, field: any) => {
+        acc[field] = 1;
+        return acc;
+      }, {});
+
       const query = search ? { nome: { $regex: search, $options: "i" } } : {};
-      const clientes = await ClienteModel.find(query).exec();
+      const clientes = await ClienteModel.find(query, projection).exec();
       return res.status(200).json(clientes);
     }
 

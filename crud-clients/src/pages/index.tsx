@@ -1,6 +1,7 @@
 "use client"
 
 import { ICliente } from "@lib/models/Cliente";
+import { useMediaQuery } from "react-responsive";
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form } from "rsuite";
 import * as S from "./styles";
@@ -24,10 +25,26 @@ export default function Home() {
   const [openModalEdit, setOpenModalEdit] = useState(false);
   const [editingCliente, setEditingCliente] = useState<ClienteFormData | null>(null);
   const [newCliente, setNewCliente] = useState<Partial<ClienteFormData>>({});
+  const [deviceType, setDeviceType] = useState<string | null>(null);
+
+  const isMobile = useMediaQuery({ query: "(max-width: 768px)" });
+  const isTablet = useMediaQuery({ query: "(min-width: 769px) and (max-width: 1024px)" });
+
+  useEffect(() => {
+    if (isMobile) setDeviceType("mobile");
+    else if (isTablet) setDeviceType("tablet");
+    else setDeviceType("desktop");
+  }, [isMobile, isTablet]);  
+
+  useEffect(() => {
+    if (deviceType) {
+      fetchClientes();
+    }
+  }, [search, deviceType]);
 
   const fetchClientes = async () => {
     try {
-      const response = await fetch(`/api/clients?search=${search}`);
+      const response = await fetch(`/api/clients?search=${search}&device=${deviceType}`);
       if (!response.ok) throw new Error("Erro ao buscar clientes");
       const data = await response.json();
       setClientes(data);
@@ -36,10 +53,6 @@ export default function Home() {
       alert("Erro ao buscar clientes");
     }
   };
-
-  useEffect(() => {
-    fetchClientes();
-  }, [search]);
 
   const handleCreate = async () => {
     if (Object.values(newCliente).some(value => !value)) {
@@ -132,24 +145,20 @@ export default function Home() {
     email: cliente.email,
     telefone: cliente.telefone
   });
-
+  
   return (
-    <S.Container>
-      <div style={{ display: "flex", marginBottom: 20, gap: 10 }}>
-        <Input
-          placeholder="Pesquisar por nome"
-          value={search}
-          onChange={setSearch}
-        />
-        <Button
-          appearance="primary"
-          onClick={() => setOpenModalCreate(true)}
-        >
-          Novo Cliente +
-        </Button>
-      </div>
-
-      <Table data={clientes} autoHeight bordered hover>
+      <><div style={{ display: "flex", marginBottom: 20, gap: 10 }}>
+      <Input
+        placeholder="Pesquisar por nome"
+        value={search}
+        onChange={setSearch} />
+      <Button
+        appearance="primary"
+        onClick={() => setOpenModalCreate(true)}
+      >
+        Novo Cliente +
+      </Button>
+    </div><Table data={clientes} autoHeight bordered hover>
         <Column flexGrow={1} width={100} align="center" fixed>
           <HeaderCell>ID</HeaderCell>
           <Cell dataKey="_id" />
@@ -185,7 +194,7 @@ export default function Home() {
                   onClick={() => {
                     setEditingCliente(toFormData(rowData));
                     setOpenModalEdit(true);
-                  }}
+                  } }
                 >
                   Editar
                 </Button>
@@ -200,9 +209,7 @@ export default function Home() {
             )}
           </Cell>
         </Column>
-      </Table>
-
-      <Modal open={openModalCreate} onClose={() => setOpenModalCreate(false)}>
+      </Table><Modal open={openModalCreate} onClose={() => setOpenModalCreate(false)}>
         <Modal.Header>
           <Modal.Title>Novo Cliente</Modal.Title>
         </Modal.Header>
@@ -213,8 +220,7 @@ export default function Home() {
               <Form.Control
                 name="nome"
                 value={newCliente.nome || ""}
-                onChange={(value) => setNewCliente({...newCliente, nome: value})}
-              />
+                onChange={(value) => setNewCliente({ ...newCliente, nome: value })} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Idade</Form.ControlLabel>
@@ -222,16 +228,14 @@ export default function Home() {
                 name="idade"
                 type="number"
                 value={newCliente.idade || ""}
-                onChange={(value) => setNewCliente({...newCliente, idade: Number(value)})}
-              />
+                onChange={(value) => setNewCliente({ ...newCliente, idade: Number(value) })} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Sexo</Form.ControlLabel>
               <Form.Control
                 name="sexo"
                 value={newCliente.sexo || ""}
-                onChange={(value) => setNewCliente({...newCliente, sexo: value})}
-              />
+                onChange={(value) => setNewCliente({ ...newCliente, sexo: value })} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Email</Form.ControlLabel>
@@ -239,16 +243,14 @@ export default function Home() {
                 name="email"
                 type="email"
                 value={newCliente.email || ""}
-                onChange={(value) => setNewCliente({...newCliente, email: value})}
-              />
+                onChange={(value) => setNewCliente({ ...newCliente, email: value })} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Telefone</Form.ControlLabel>
               <Form.Control
                 name="telefone"
                 value={newCliente.telefone || ""}
-                onChange={(value) => setNewCliente({...newCliente, telefone: value})}
-              />
+                onChange={(value) => setNewCliente({ ...newCliente, telefone: value })} />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -260,9 +262,7 @@ export default function Home() {
             Cancelar
           </Button>
         </Modal.Footer>
-      </Modal>
-
-      <Modal open={openModalEdit} onClose={() => setOpenModalEdit(false)}>
+      </Modal><Modal open={openModalEdit} onClose={() => setOpenModalEdit(false)}>
         <Modal.Header>
           <Modal.Title>Editar Cliente</Modal.Title>
         </Modal.Header>
@@ -273,8 +273,7 @@ export default function Home() {
               <Form.Control
                 name="nome"
                 value={editingCliente?.nome || ""}
-                onChange={(value) => setEditingCliente(editingCliente ? {...editingCliente, nome: value} : null)}
-              />
+                onChange={(value) => setEditingCliente(editingCliente ? { ...editingCliente, nome: value } : null)} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Idade</Form.ControlLabel>
@@ -282,16 +281,14 @@ export default function Home() {
                 name="idade"
                 type="number"
                 value={editingCliente?.idade || ""}
-                onChange={(value) => setEditingCliente(editingCliente ? {...editingCliente, idade: Number(value)} : null)}
-              />
+                onChange={(value) => setEditingCliente(editingCliente ? { ...editingCliente, idade: Number(value) } : null)} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Sexo</Form.ControlLabel>
               <Form.Control
                 name="sexo"
                 value={editingCliente?.sexo || ""}
-                onChange={(value) => setEditingCliente(editingCliente ? {...editingCliente, sexo: value} : null)}
-              />
+                onChange={(value) => setEditingCliente(editingCliente ? { ...editingCliente, sexo: value } : null)} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Email</Form.ControlLabel>
@@ -299,16 +296,14 @@ export default function Home() {
                 name="email"
                 type="email"
                 value={editingCliente?.email || ""}
-                onChange={(value) => setEditingCliente(editingCliente ? {...editingCliente, email: value} : null)}
-              />
+                onChange={(value) => setEditingCliente(editingCliente ? { ...editingCliente, email: value } : null)} />
             </Form.Group>
             <Form.Group>
               <Form.ControlLabel>Telefone</Form.ControlLabel>
               <Form.Control
                 name="telefone"
                 value={editingCliente?.telefone || ""}
-                onChange={(value) => setEditingCliente(editingCliente ? {...editingCliente, telefone: value} : null)}
-              />
+                onChange={(value) => setEditingCliente(editingCliente ? { ...editingCliente, telefone: value } : null)} />
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -320,7 +315,6 @@ export default function Home() {
             Cancelar
           </Button>
         </Modal.Footer>
-      </Modal>
-    </S.Container>
+      </Modal></>
   );
 }
