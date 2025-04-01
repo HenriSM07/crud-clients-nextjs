@@ -9,19 +9,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { search } = req.query;
       const deviceType = req.query.device || req.headers["device-type"] || "desktop";
 
-      let fieldsToInclude = ["_id", "nome", "idade", "sexo", "email", "telefone"];
+      let fieldsToInclude = ["nome", "idade", "sexo", "email", "telefone"];
+  
       if (deviceType === "tablet") {
-        fieldsToInclude = fieldsToInclude.filter((field) => field !== "telefone");
+        fieldsToInclude = fieldsToInclude.filter(
+          (field) => !["sexo", "telefone"].includes(field)
+        );
       } else if (deviceType === "mobile") {
         fieldsToInclude = fieldsToInclude.filter(
-          (field) => !["telefone", "email"].includes(field)
+          (field) => !["sexo", "telefone", "email"].includes(field)
         );
       }
-
       const projection = fieldsToInclude.reduce((acc: any, field: any) => {
         acc[field] = 1;
         return acc;
       }, {});
+
+      projection._id = 1;
 
       const query = search ? { nome: { $regex: search, $options: "i" } } : {};
       const clientes = await ClienteModel.find(query, projection).exec();
@@ -52,17 +56,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === "DELETE") {
       const { _id } = req.body;
       console.log("ID recebido para exclusão:", _id);
-    
+
       if (!_id) {
         return res.status(400).json({ error: "ID do cliente é obrigatório" });
       }
-    
+
       try {
         const result = await ClienteModel.findByIdAndDelete(_id).exec();
         if (!result) {
           return res.status(404).json({ error: "Cliente não encontrado" });
         }
-    
+
         return res.status(200).json({ message: "Cliente excluído com sucesso" });
       } catch (error) {
         console.error("Erro ao excluir cliente:", error);
